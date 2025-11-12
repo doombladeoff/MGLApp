@@ -4,7 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
-export const UpcomingGameCard = ({ item }: { item: any }) => {
+export const GameCard = ({ item }: { item: any }) => {
   const coverUrl = `https:${item?.cover?.url?.replace("t_thumb", "t_cover_big")}`;
   const releaseDate = new Date(item?.first_release_date * 1000)
     .toLocaleDateString("ru-RU", { day: "numeric", month: "short" })

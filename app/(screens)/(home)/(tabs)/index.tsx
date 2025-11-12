@@ -1,7 +1,7 @@
 
 import { getTopGames } from '@/api/getTopGames';
 import { getUpcomingGames } from '@/api/getUpcuming';
-import UpcomingGames from '@/components/upcoming/UpcomingGames';
+import GameList from '@/components/upcoming/GameList';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Button } from '@react-navigation/elements';
 import { BlurView } from 'expo-blur';
@@ -23,12 +23,10 @@ export default function HomeScreen() {
 
   const getData = async (): Promise<void> => {
     try {
-      const [topGames, upcomingGames] = await Promise.all([
         getTopGames(),
         getUpcomingGames(),
       ]);
 
-      console.log(upcomingGames)
       setTopGames(topGames);
       setUpcomingGames(upcomingGames);
     } catch (error) {
@@ -57,7 +55,7 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView contentInsetAdjustmentBehavior='automatic' contentContainerStyle={{ paddingHorizontal: 10 }}>
-        <UpcomingGames data={upcomingGames || []} />
+        <GameList data={upcomingGames || []} title='Скоро выйдут 💫' />
         <View style={{ marginTop: 10 }}>
           <Text style={{ color: 'white', fontSize: 20, fontWeight: '600', marginBottom: 10, paddingLeft: 10 }}>Самые популярные игры</Text>
           {topGames.map((el: any, index: number) => (

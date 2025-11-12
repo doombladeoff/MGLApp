@@ -7,23 +7,44 @@ export async function getGameById(gameId: number) {
     const token = await getTwitchToken();
 
     const query = `
-    fields
+    fields 
+      id,
       name,
       summary,
-      cover.url,
-      genres.name,
-      platforms.name,
-      game_modes.name,
-      player_perspectives.name,
-      release_dates.human,
-      screenshots.url,
-      screenshots.height,
-      screenshots.width,
-      screenshots.animated,
-      screenshots.checksum,
-      themes.name,
-      keywords.name,
-      game_engines.name;
+      storyline,
+      category,
+      cover.*,
+      genres.*,
+      keywords.*,
+      game_modes.*,
+      player_perspectives.*,
+      themes.*,
+      platforms.*,
+      release_dates.*,
+      screenshots.*,
+      videos.*,
+      websites.*,
+      game_engines.*,
+      similar_games.*,
+      involved_companies.company.name,
+      involved_companies.developer,
+      involved_companies.publisher,
+      age_ratings.*,
+      artworks.*,
+      collections.*,
+      dlcs.*,
+      franchises.*,
+      expansions.*,
+      language_supports.*,
+      multiplayer_modes.*,
+      alternative_names.*,
+      ports.*,
+      remakes.*,
+      remasters.*,
+      bundles.*,
+      external_games.*,
+      parent_game,
+      version_parent;
     where id = ${gameId};
   `;
 
@@ -35,5 +56,6 @@ export async function getGameById(gameId: number) {
         },
     });
 
+    console.log(res.data)
     return res.data;
 }

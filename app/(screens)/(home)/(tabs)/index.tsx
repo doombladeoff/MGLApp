@@ -9,6 +9,12 @@ export default function HomeScreen() {
           <Text style={{ color: 'white' }}>GAME</Text>
         </Pressable>
       </Link>
+
+      <Link href={{ pathname: '/(screens)/(game)/[id]', params: { id: 13166 } }} asChild>
+        <Pressable>
+          <Text style={{ color: 'white' }}>GAME 13166</Text>
+        </Pressable>
+      </Link>
     </View>
   );
 }

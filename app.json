@@ -9,7 +9,9 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./assets/mgl-icon.icon",
+      "bundleIdentifier": "com.f0rever.MGLApp"
     },
     "android": {
       "adaptiveIcon": {

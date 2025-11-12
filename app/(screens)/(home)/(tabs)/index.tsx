@@ -1,4 +1,5 @@
 
+import { getNewReleases } from '@/api/getNewReleases';
 import { getTopGames } from '@/api/getTopGames';
 import { getUpcomingGames } from '@/api/getUpcuming';
 import GameList from '@/components/upcoming/GameList';
@@ -20,15 +21,19 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const [topGames, setTopGames] = useState([]);
   const [upcomingGames, setUpcomingGames] = useState([]);
+  const [newReleases, setNewReleases] = useState([]);
 
   const getData = async (): Promise<void> => {
     try {
+      const [topGames, upcomingGames, newReleases] = await Promise.all([
         getTopGames(),
         getUpcomingGames(),
+        getNewReleases()
       ]);
 
       setTopGames(topGames);
       setUpcomingGames(upcomingGames);
+      setNewReleases(newReleases);
     } catch (error) {
       console.error("Ошибка при получении данных:", error);
     }
@@ -55,6 +60,7 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView contentInsetAdjustmentBehavior='automatic' contentContainerStyle={{ paddingHorizontal: 10 }}>
+        <GameList data={newReleases || []} title='Новые релизы 💥' />
         <GameList data={upcomingGames || []} title='Скоро выйдут 💫' />
         <View style={{ marginTop: 10 }}>
           <Text style={{ color: 'white', fontSize: 20, fontWeight: '600', marginBottom: 10, paddingLeft: 10 }}>Самые популярные игры</Text>

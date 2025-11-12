@@ -1,5 +1,7 @@
 
 import { getTopGames } from '@/api/getTopGames';
+import { getUpcomingGames } from '@/api/getUpcuming';
+import UpcomingGames from '@/components/upcoming/UpcomingGames';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Button } from '@react-navigation/elements';
 import { BlurView } from 'expo-blur';
@@ -17,10 +19,21 @@ function formatRating(value?: number) {
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const [topGames, setTopGames] = useState([]);
+  const [upcomingGames, setUpcomingGames] = useState([]);
 
-  const getData = async () => {
-    const data = await getTopGames();
-    setTopGames(data);
+  const getData = async (): Promise<void> => {
+    try {
+      const [topGames, upcomingGames] = await Promise.all([
+        getTopGames(),
+        getUpcomingGames(),
+      ]);
+
+      console.log(upcomingGames)
+      setTopGames(topGames);
+      setUpcomingGames(upcomingGames);
+    } catch (error) {
+      console.error("Ошибка при получении данных:", error);
+    }
   };
 
   useEffect(() => {
@@ -44,7 +57,8 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView contentInsetAdjustmentBehavior='automatic' contentContainerStyle={{ paddingHorizontal: 10 }}>
-        <View>
+        <UpcomingGames data={upcomingGames || []} />
+        <View style={{ marginTop: 10 }}>
           <Text style={{ color: 'white', fontSize: 20, fontWeight: '600', marginBottom: 10, paddingLeft: 10 }}>Самые популярные игры</Text>
           {topGames.map((el: any, index: number) => (
             <Link
@@ -143,4 +157,4 @@ export default function HomeScreen() {
       </ScrollView>
     </View>
   );
-}
+};

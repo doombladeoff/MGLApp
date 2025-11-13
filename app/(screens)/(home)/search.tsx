@@ -1,9 +1,21 @@
+import { getSearchGames } from "@/api/getSearchGames";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { HeaderBackButton, useHeaderHeight } from "@react-navigation/elements";
-import { router } from "expo-router";
+import { Image } from "expo-image";
+import { Link, router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, TextInput, View } from "react-native";
+import {
+    ActivityIndicator,
+    FlatList,
+    Pressable,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
 import Animated, {
+    FadeIn,
+    FadeOut,
     useAnimatedStyle,
     useSharedValue,
     withTiming,
@@ -14,7 +26,12 @@ export default function SearchScreen() {
     const insets = useSafeAreaInsets();
     const headerHeight = useHeaderHeight();
     const [query, setQuery] = useState("");
+    const [data, setData] = useState<any[]>([]);
+    const [page, setPage] = useState<number>(0);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [hasMore, setHasMore] = useState(true);
     const inputRef = useRef<TextInput>(null);
+    const debounceRef = useRef<number | null>(null);
 
     const progress = useSharedValue(0);
 
@@ -27,6 +44,9 @@ export default function SearchScreen() {
         progress.value = withTiming(0, { duration: 300 });
         inputRef.current?.blur();
         setQuery("");
+        setData([]);
+        setPage(0);
+        setHasMore(true);
     };
 
     const backButtonStyle = useAnimatedStyle(() => ({
@@ -53,9 +73,162 @@ export default function SearchScreen() {
         opacity: withTiming(progress.value),
     }));
 
+    const loadData = async (pageNumber: number, searchText: string, reset = false) => {
+        if (loading || !searchText.trim()) return;
+        const LIMIT = 20;
+        const offset = pageNumber * LIMIT;
+
+        if (!reset && pageNumber > 0 && !hasMore) return;
+
+        setLoading(true);
+
+        try {
+            const result = await getSearchGames(searchText, offset, LIMIT);
+            if (reset) {
+                setData(result);
+            } else {
+                setData(prev => [...prev, ...result]);
+            }
+            setHasMore(result.length === LIMIT);
+            setPage(pageNumber);
+            setLoading(false);
+        } catch (err) {
+            setLoading(false);
+            console.error("Ошибка загрузки данных IGDB:", err);
+        }
+    };
+
+    const handleLoadMore = async () => {
+        if (!hasMore || loading) return;
+        await loadData(page + 1, query);
+    };
+
     useEffect(() => {
         openSearch();
     }, []);
+
+    useEffect(() => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+
+        if (!query.trim()) {
+            setData([]);
+            setHasMore(true);
+            setPage(0);
+            return;
+        }
+
+        debounceRef.current = setTimeout(() => {
+            loadData(0, query, true);
+        }, 800);
+
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+        };
+    }, [query]);
+
+    const SearchItem = ({ item }: { item: any }) => {
+        return (
+            <Link
+                href={{
+                    pathname: "/(screens)/(game)/[id]",
+                    params: { id: item.id },
+                }}
+                asChild
+            >
+                <Pressable>
+                    <Animated.View
+                        entering={FadeIn}
+                        style={{
+                            flexDirection: "row",
+                            backgroundColor: "rgba(255,255,255,0.05)",
+                            borderRadius: 16,
+                            overflow: "hidden",
+                            padding: 10,
+                            alignItems: "center",
+                            gap: 10,
+                        }}
+                    >
+                        <Image
+                            source={{
+                                uri: `https:${item?.cover?.url?.replace(
+                                    "t_thumb",
+                                    "t_cover_big"
+                                )}`,
+                            }}
+                            style={{
+                                width: 100,
+                                height: 140,
+                                borderRadius: 12,
+                                backgroundColor: "rgba(255,255,255,0.1)",
+                            }}
+                            contentFit="cover"
+                            transition={400}
+                        />
+
+                        <View style={{ flex: 1, justifyContent: "space-between" }}>
+                            <View>
+                                <Text
+                                    style={{
+                                        color: "white",
+                                        fontSize: 16,
+                                        fontWeight: "700",
+                                        flexShrink: 1,
+                                    }}
+                                    numberOfLines={2}
+                                >
+                                    {item?.name}
+                                </Text>
+                                <Text
+                                    style={{
+                                        color: "rgba(255,255,255,0.7)",
+                                        marginTop: 2,
+                                    }}
+                                    numberOfLines={1}
+                                >
+                                    {item?.genres?.map((el: any) => el.name).join(", ")}
+                                </Text>
+                            </View>
+
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    marginTop: 8,
+                                }}
+                            >
+                                <Text style={{ color: "rgba(255,255,255,0.7)" }}>
+                                    {item?.releaseYear}
+                                </Text>
+
+                                <Pressable
+                                    style={{
+                                        borderRadius: 999,
+                                        borderWidth: 1,
+                                        borderColor: "rgba(255,255,255,0.2)",
+                                        padding: 6,
+                                        backgroundColor: "rgba(255,255,255,0.05)",
+                                    }}
+                                    onPress={() => console.log("Добавлено")}
+                                >
+                                    <Ionicons name="add" size={16} color="white" />
+                                </Pressable>
+                            </View>
+                        </View>
+                    </Animated.View>
+                </Pressable>
+            </Link>
+        );
+    };
+
+    const EmptyPlaceholder = () => {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', top: -60, gap: 10 }}>
+                <Ionicons name="game-controller" size={64} color="white" />
+                <Text style={{ color: 'white', fontSize: 16, fontWeight: '700' }}>Время найти любимую игру?</Text>
+            </View>
+        );
+    };
 
     return (
         <>
@@ -104,6 +277,16 @@ export default function SearchScreen() {
                                 }}
                                 returnKeyType="search"
                             />
+                            {query.length > 1 && (
+                                <Animated.View entering={FadeIn} exiting={FadeOut}>
+                                    <Pressable
+                                        hitSlop={10}
+                                        onPress={() => setQuery('')}
+                                        style={{ padding: 4, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 100 }}>
+                                        <IconSymbol name="xmark" size={14} color="#B0B0B0" />
+                                    </Pressable>
+                                </Animated.View>
+                            )}
                         </View>
                     </Animated.View>
 
@@ -114,10 +297,7 @@ export default function SearchScreen() {
                     </Animated.View>
 
                     <Animated.View
-                        style={[
-                            cancelButtonStyle,
-                            { position: "absolute", right: 12 },
-                        ]}
+                        style={[cancelButtonStyle, { position: "absolute", right: 12 }]}
                     >
                         <Pressable onPress={closeSearch} hitSlop={10}>
                             <Animated.Text style={{ color: "#0A84FF", fontSize: 16 }}>
@@ -127,9 +307,25 @@ export default function SearchScreen() {
                     </Animated.View>
                 </View>
             </Animated.View>
-
-            <View style={{ flex: 1 }}>
-            </View>
+            {data.length < 1 ? (
+                <EmptyPlaceholder />
+            ) : (
+                <View style={{ flex: 1, backgroundColor: "black" }}>
+                    <FlatList
+                        data={data}
+                        keyExtractor={(item) => item.id.toString()}
+                        contentContainerStyle={{ padding: 12, gap: 12 }}
+                        contentInsetAdjustmentBehavior="automatic"
+                        keyboardDismissMode="on-drag"
+                        onEndReachedThreshold={0.8}
+                        onEndReached={handleLoadMore}
+                        ListFooterComponent={
+                            loading ? <ActivityIndicator size="large" color="white" /> : null
+                        }
+                        renderItem={({ item }) => <SearchItem item={item} />}
+                    />
+                </View>
+            )}
         </>
     );
 }

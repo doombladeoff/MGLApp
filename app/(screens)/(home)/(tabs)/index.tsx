@@ -4,13 +4,11 @@ import { getTopGames } from '@/api/getTopGames';
 import { getUpcomingGames } from '@/api/getUpcuming';
 import GameList from '@/components/upcoming/GameList';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Button } from '@react-navigation/elements';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function formatRating(value?: number) {
   if (!value) return "—";
@@ -18,7 +16,6 @@ function formatRating(value?: number) {
 };
 
 export default function HomeScreen() {
-  const insets = useSafeAreaInsets();
   const [topGames, setTopGames] = useState([]);
   const [upcomingGames, setUpcomingGames] = useState([]);
   const [newReleases, setNewReleases] = useState([]);
@@ -46,7 +43,7 @@ export default function HomeScreen() {
   return (
     <View style={{ flex: 1 }}>
       {/* TEST */}
-      <View style={{ paddingTop: insets.top, gap: 5 }}>
+      {/* <View style={{ gap: 5 }}>
         <Link href={{ pathname: '/(screens)/(game)/[id]', params: { id: 1942 } }} asChild>
           <Button color={'white'}>
             Game
@@ -57,9 +54,9 @@ export default function HomeScreen() {
             Game id 13166
           </Button>
         </Link>
-      </View>
+      </View> */}
 
-      <ScrollView contentInsetAdjustmentBehavior='automatic' contentContainerStyle={{ paddingHorizontal: 10 }}>
+      <ScrollView contentInsetAdjustmentBehavior='automatic' contentContainerStyle={{ paddingHorizontal: 10, paddingTop: 10 }}>
         <GameList data={newReleases || []} title='Новые релизы 💥' />
         <GameList data={upcomingGames || []} title='Скоро выйдут 💫' />
         <View style={{ marginTop: 10 }}>

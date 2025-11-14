@@ -5,6 +5,7 @@ import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Image } from 'expo-image';
 import { Pressable } from 'react-native';
 
 export default function TabLayout() {
@@ -23,6 +24,7 @@ export default function TabLayout() {
           title: 'Главная',
           headerShown: true,
           headerTitle: '',
+          headerLeft: () => <Image source={require('@/assets/images/logoshort.svg')} style={{ height: 35, width: 100, marginLeft: 10 }} contentFit='contain' />,
           headerRight: () => (
             <Pressable
               hitSlop={10}

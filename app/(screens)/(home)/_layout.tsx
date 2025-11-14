@@ -1,6 +1,4 @@
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import { router, Stack } from "expo-router";
-import { Pressable } from "react-native";
+import { Stack } from "expo-router";
 
 export default function HomeLayout() {
   return (
@@ -8,19 +6,8 @@ export default function HomeLayout() {
       <Stack.Screen
         name="(tabs)"
         options={{
-          headerShown: true,
+          headerShown: false,
           headerTitle: '',
-          headerRight: () => (
-            <Pressable
-              hitSlop={10}
-              onPress={() => router.push({ pathname: '/search' })}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.8 : 1
-              })}
-            >
-              <IconSymbol name='magnifyingglass' size={28} color={'white'} />
-            </Pressable>
-          )
         }}
       />
       <Stack.Screen

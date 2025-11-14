@@ -1,5 +1,6 @@
 import { getGameById } from "@/api/getGame";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { GameGenres } from "@/constants/genres";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -176,7 +177,7 @@ export default function GameScreen() {
                         <MetaRow label="Издатели" value={publishers || "—"} />
                         <MetaRow
                             label="Жанры"
-                            value={game?.genres?.map((el: any) => el.name).join(", ")}
+                            value={game?.genres?.map((el: any) => GameGenres[el.id as keyof typeof GameGenres] ?? 'Неизвестно').join(", ")}
                         />
                         <MetaRow
                             label="Платформы"

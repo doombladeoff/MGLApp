@@ -1,3 +1,4 @@
+import { GameGenres } from "@/constants/genres";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -7,7 +8,7 @@ type GameItemProps = {
     id: number;
     name: string;
     cover: { url: string };
-    genres?: { name: string }[];
+    genres?: { id: number; name: string }[];
     platforms?: { name: string }[];
   };
   onPress?: () => void;
@@ -34,7 +35,7 @@ export default function GameItem({ item }: GameItemProps) {
             {item.name}
           </Text>
           <Text style={styles.genres} numberOfLines={1}>
-            {item.genres?.map(g => g.name).join(', ')}
+            {item.genres?.map(g => GameGenres[g.id as keyof typeof GameGenres] ?? 'Неизвестно').join(', ')}
           </Text>
           <Text style={styles.platforms} numberOfLines={1}>
             {item.platforms?.map(p => p.name).join(', ')}

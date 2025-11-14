@@ -1,5 +1,6 @@
 import { getSearchGames } from "@/api/getSearchGames";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { GameGenres } from "@/constants/genres";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { HeaderBackButton, useHeaderHeight } from "@react-navigation/elements";
 import { Image } from "expo-image";
@@ -185,7 +186,7 @@ export default function SearchScreen() {
                                     }}
                                     numberOfLines={1}
                                 >
-                                    {item?.genres?.map((el: any) => el.name).join(", ")}
+                                    {item?.genres?.map((el: any) => GameGenres[el.id as keyof typeof GameGenres] ?? 'Неизвестно').join(", ")}
                                 </Text>
                             </View>
 

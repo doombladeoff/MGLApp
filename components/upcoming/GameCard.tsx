@@ -1,3 +1,4 @@
+import { GameGenres } from "@/constants/genres";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -75,7 +76,7 @@ export const GameCard = ({ item }: { item: any }) => {
             fontSize: 12,
           }}
         >
-          {item?.genres?.map((el: any) => el.name).join(", ")}
+          {item?.genres?.map((el: any) => GameGenres[el.id as keyof typeof GameGenres] ?? 'Неизвестно').join(", ")}
         </Text>
       </View>
 

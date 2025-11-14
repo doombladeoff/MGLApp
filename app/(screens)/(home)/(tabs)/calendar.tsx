@@ -6,6 +6,7 @@ import { getCalendar } from '@/api/getCalendar';
 import { CalendarHeaderCenter, CalendarHeaderRight } from "@/components/calendar/CalendarHeader";
 import GameItem from "@/components/calendar/GameItem";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { Image } from "expo-image";
 import { useCallback, useEffect, useState } from 'react';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
@@ -115,8 +116,9 @@ export default function CalendarScreen() {
           </Animated.View>
         )}
         {(sections.length < 1) ? (
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ color: 'white' }}>Ничего не найдено</Text>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 35 }}>
+            <Image source={require('@/assets/images/error_exclamation.png')} style={{ width: 100, height: 180, transform: [{ scale: 1.5 }] }} />
+            <Text style={{ color: 'white', fontSize: 20, fontWeight: '700' }}>Ничего не найдено</Text>
           </View>
         ) : (
           <SectionList

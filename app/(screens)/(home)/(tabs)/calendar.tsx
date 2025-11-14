@@ -3,14 +3,17 @@ import { Stack } from "expo-router";
 import { ActivityIndicator, SectionList, Text, View } from "react-native";
 
 import { getCalendar } from '@/api/getCalendar';
-import CalendarHeader from "@/components/calendar/CalendarHeader";
+import { CalendarHeaderCenter, CalendarHeaderRight } from "@/components/calendar/CalendarHeader";
 import GameItem from "@/components/calendar/GameItem";
+import { useHeaderHeight } from "@react-navigation/elements";
 import { useCallback, useEffect, useState } from 'react';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 const today = new Date();
 
 export default function CalendarScreen() {
+  const headerHeight = useHeaderHeight();
+
   const [date, setDate] = useState(today);
   const [loading, setLoading] = useState<boolean>(false);
   const [sections, setSections] = useState<{
@@ -88,12 +91,15 @@ export default function CalendarScreen() {
     <>
       <Stack.Screen
         options={{
-          headerTransparent: true,
-          header: () => (
-            <CalendarHeader
+          headerTitle: () => (
+            <CalendarHeaderCenter
               date={date}
               changeDay={changeDay}
               onChange={onChange}
+            />
+          ),
+          headerRight: () => (
+            <CalendarHeaderRight
               resetDay={resetDay}
             />
           ),
@@ -104,7 +110,7 @@ export default function CalendarScreen() {
           <Animated.View
             entering={FadeIn}
             exiting={FadeOut}
-            style={{ position: 'absolute', width: '100%', height: '100%', top: 110, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 999 }}>
+            style={{ position: 'absolute', width: '100%', height: '100%', top: headerHeight, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 999 }}>
             <ActivityIndicator size='large' />
           </Animated.View>
         )}
@@ -117,6 +123,7 @@ export default function CalendarScreen() {
             sections={sections}
             keyExtractor={(item) => item.id.toString()}
             contentContainerStyle={{ gap: 10, paddingTop: 40 }}
+            scrollIndicatorInsets={{ top: 40 }}
             contentInsetAdjustmentBehavior='automatic'
             renderItem={({ item }) => (
               <GameItem item={item} />

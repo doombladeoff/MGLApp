@@ -5,8 +5,9 @@ import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
-import { Pressable } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -47,6 +48,9 @@ export default function TabLayout() {
           title: 'Календарь',
           headerTitle: '',
           headerShown: true,
+          headerTransparent: true,
+          headerBackground: () => <BlurView style={StyleSheet.absoluteFill} />,
+          headerLeft: () => <Image source={require('@/assets/images/logoshort.svg')} style={{ height: 35, width: 100, marginLeft: 10 }} contentFit='contain' />,
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="calendar" color={color} />,
         }}
       />

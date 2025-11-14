@@ -12,6 +12,13 @@ export default function ScreensLayout() {
           headerBackTitle: 'Назад'
         }}
       />
+      <Stack.Screen
+        name="user/[id]"
+        options={{
+          headerTitle: '',
+          headerBackTitle: 'Назад'
+        }}
+      />
     </Stack>
   );
 }

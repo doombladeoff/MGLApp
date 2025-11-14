@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 export const GameCard = ({ item }: { item: any }) => {
   const coverUrl = `https:${item?.cover?.url?.replace("t_thumb", "t_cover_big")}`;
@@ -12,7 +13,8 @@ export const GameCard = ({ item }: { item: any }) => {
     .replace(".", "");
 
   return (
-    <View
+    <Animated.View
+      entering={FadeIn.duration(500)}
       style={{
         width: 170,
         borderWidth: 0.5,
@@ -108,6 +110,6 @@ export const GameCard = ({ item }: { item: any }) => {
           <Ionicons name="add" size={14} color="white" />
         </Pressable>
       </View>
-    </View>
+    </Animated.View>
   );
 };

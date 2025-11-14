@@ -5,10 +5,12 @@ import { getUpcomingGames } from '@/api/getUpcuming';
 import GameList from '@/components/upcoming/GameList';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { BlurView } from 'expo-blur';
+import * as Crypto from 'expo-crypto';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 function formatRating(value?: number) {
   if (!value) return "—";
@@ -61,99 +63,122 @@ export default function HomeScreen() {
         <GameList data={upcomingGames || []} title='Скоро выйдут 💫' />
         <View style={{ marginTop: 10 }}>
           <Text style={{ color: 'white', fontSize: 20, fontWeight: '600', marginBottom: 10, paddingLeft: 10 }}>Самые популярные игры</Text>
-          {topGames.map((el: any, index: number) => (
-            <Link
-              key={el.id}
-              href={{
-                pathname: '/(screens)/(game)/[id]',
-                params: { id: el.id }
-              }}
-              asChild
-            >
-              <Pressable>
-                <BlurView
-                  intensity={60}
-                  tint="dark"
+          {!topGames.length ? (
+            <>
+              {Array.from({ length: 5 }).map(() => (
+                <View
+                  key={Crypto.randomUUID()}
                   style={{
-                    flexDirection: 'row',
+                    width: '100%',
+                    height: 120,
                     alignItems: 'center',
                     borderRadius: 18,
                     overflow: 'hidden',
                     marginBottom: 14,
                     backgroundColor: 'rgba(255,255,255,0.05)',
                   }}
+                />
+              ))}
+            </>
+          ) : (
+            <>
+              {topGames.map((el: any, index: number) => (
+                <Link
+                  key={el.id}
+                  href={{
+                    pathname: '/(screens)/(game)/[id]',
+                    params: { id: el.id }
+                  }}
+                  asChild
                 >
-                  <Image
-                    source={{ uri: `https:${el.cover.url.replace("t_thumb", "t_cover_big")}` }}
-                    style={{
-                      ...StyleSheet.absoluteFillObject,
-                      opacity: 0.15,
-                      borderRadius: 18,
-                    }}
-                    blurRadius={15}
-                  />
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      padding: 10,
-                      flex: 1,
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexShrink: 1 }}>
-                      <View style={{ position: 'relative' }}>
+                  <Pressable>
+                    <Animated.View entering={FadeIn.duration(500)}>
+                      <BlurView
+                        intensity={60}
+                        tint="dark"
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          borderRadius: 18,
+                          overflow: 'hidden',
+                          marginBottom: 14,
+                          backgroundColor: 'rgba(255,255,255,0.05)',
+                        }}
+                      >
                         <Image
                           source={{ uri: `https:${el.cover.url.replace("t_thumb", "t_cover_big")}` }}
                           style={{
-                            width: 70,
-                            height: 100,
-                            borderRadius: 12,
-                            backgroundColor: 'rgba(255,255,255,0.1)',
+                            ...StyleSheet.absoluteFillObject,
+                            opacity: 0.15,
+                            borderRadius: 18,
                           }}
+                          blurRadius={15}
                         />
                         <View
                           style={{
-                            position: 'absolute',
-                            bottom: 4,
-                            right: 4,
-                            backgroundColor: 'rgba(0,0,0,0.8)',
-                            borderRadius: 8,
-                            paddingHorizontal: 6,
-                            paddingVertical: 2,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            padding: 10,
+                            flex: 1,
+                            justifyContent: 'space-between',
                           }}
                         >
-                          <Text style={{ color: 'white', fontWeight: '600', fontSize: 12 }}>
-                            #{index + 1}
-                          </Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexShrink: 1 }}>
+                            <View style={{ position: 'relative' }}>
+                              <Image
+                                source={{ uri: `https:${el.cover.url.replace("t_thumb", "t_cover_big")}` }}
+                                style={{
+                                  width: 70,
+                                  height: 100,
+                                  borderRadius: 12,
+                                  backgroundColor: 'rgba(255,255,255,0.1)',
+                                }}
+                              />
+                              <View
+                                style={{
+                                  position: 'absolute',
+                                  bottom: 4,
+                                  right: 4,
+                                  backgroundColor: 'rgba(0,0,0,0.8)',
+                                  borderRadius: 8,
+                                  paddingHorizontal: 6,
+                                  paddingVertical: 2,
+                                }}
+                              >
+                                <Text style={{ color: 'white', fontWeight: '600', fontSize: 12 }}>
+                                  #{index + 1}
+                                </Text>
+                              </View>
+                            </View>
+
+                            <View style={{ flexShrink: 1 }}>
+                              <Text
+                                style={{
+                                  color: 'white',
+                                  fontSize: 16,
+                                  fontWeight: '700',
+                                }}
+                                numberOfLines={1}
+                              >
+                                {el.name}
+                              </Text>
+                            </View>
+                          </View>
+
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                            <Ionicons name="star" size={18} color="white" />
+                            <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>
+                              {`${formatRating(el.total_rating_count)}т` || 0}
+                            </Text>
+                          </View>
                         </View>
-                      </View>
-
-                      <View style={{ flexShrink: 1 }}>
-                        <Text
-                          style={{
-                            color: 'white',
-                            fontSize: 16,
-                            fontWeight: '700',
-                          }}
-                          numberOfLines={1}
-                        >
-                          {el.name}
-                        </Text>
-                      </View>
-                    </View>
-
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                      <Ionicons name="star" size={18} color="white" />
-                      <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>
-                        {`${formatRating(el.total_rating_count)}т` || 0}
-                      </Text>
-                    </View>
-                  </View>
-                </BlurView>
-              </Pressable>
-            </Link>
-          ))}
+                      </BlurView>
+                    </Animated.View>
+                  </Pressable>
+                </Link>
+              ))}
+            </>
+          )}
         </View>
       </ScrollView>
     </View>

@@ -6,6 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
 import { PlatformColor, Text, TouchableOpacity, View } from "react-native";
 import { IconSymbol } from "../ui/icon-symbol";
+import { Tabs } from "./Tabs";
 
 export function UserCard() {
   const { user } = useUser();
@@ -118,6 +119,7 @@ export function UserCard() {
           </Link>
         </View>
       </View>
+      <Tabs />
     </View>
   );
 };

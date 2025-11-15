@@ -1,4 +1,5 @@
 import { Input } from '@/components/auth/Input';
+import { SSOButton } from '@/components/auth/SSOButton';
 import { useSignUp } from '@clerk/clerk-expo';
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
@@ -85,6 +86,17 @@ export default function SignUpScreen() {
                         </Text>
                     </Link>
                 </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ flex: 1, height: 1, backgroundColor: 'gray' }} />
+                <Text style={{ marginHorizontal: 8, color: 'gray' }}>или</Text>
+                <View style={{ flex: 1, height: 1, backgroundColor: 'gray' }} />
+            </View>
+
+            <View style={{ gap: 12 }}>
+                <SSOButton variant='oauth_google' />
+                <SSOButton variant='oauth_apple' />
             </View>
         </View>
     );

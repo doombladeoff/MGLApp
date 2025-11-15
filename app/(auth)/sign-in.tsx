@@ -1,4 +1,5 @@
 import { Input } from '@/components/auth/Input'
+import { SSOButton } from '@/components/auth/SSOButton'
 import { useSignIn } from '@clerk/clerk-expo'
 import { Image } from 'expo-image'
 import { Link } from 'expo-router'
@@ -108,6 +109,11 @@ export default function SignInScreen() {
                 <View style={{ flex: 1, height: 1, backgroundColor: 'gray' }} />
                 <Text style={{ marginHorizontal: 8, color: 'gray' }}>или</Text>
                 <View style={{ flex: 1, height: 1, backgroundColor: 'gray' }} />
+            </View>
+
+            <View style={{ gap: 12 }}>
+                <SSOButton variant='oauth_google' />
+                <SSOButton variant='oauth_apple' />
             </View>
         </View>
     );

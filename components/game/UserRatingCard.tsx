@@ -69,7 +69,9 @@ export const UserRatingCard = ({ gameDataUserDB }: { gameDataUserDB?: GameDataUs
 
           <View style={{ height: 90, justifyContent: 'center' }}>
             <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 16, fontWeight: '600' }}>Ваша оценка</Text>
-            <Text style={{ color: scoreColor, fontSize: 30, fontWeight: 'bold', }}>{`${gameDataUserDB?.rating.toFixed(1)}` || `NS`}</Text>
+            <Text style={{ color: scoreColor, fontSize: 30, fontWeight: 'bold', }}>
+              {gameDataUserDB?.rating != null ? gameDataUserDB.rating.toFixed(1) : 'NS'}
+            </Text>
             <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 16, fontWeight: '600' }}>{GameStatusNames[gameDataUserDB?.status as GameStatus] || "Без статуса"}</Text>
           </View>
 

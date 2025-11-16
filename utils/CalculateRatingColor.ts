@@ -4,6 +4,8 @@ function clamp(value: number): number {
 }
 
 export function CalculateRatingColor(ratingInput: number): string {
+  if (ratingInput <= 0) return `rgb(136,136,136)`;
+
   const rating = Math.max(0.1, Math.min(10.0, ratingInput));
 
   const startColor = { r: 255, g: 80, b: 38 };

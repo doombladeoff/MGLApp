@@ -8,6 +8,7 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ActivityIndicator } from 'react-native';
+import SupabaseProvider from './providers/SupabaseProvider';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -37,10 +38,12 @@ export default function RootLayout() {
 
   return (
     <ClerkProvider tokenCache={tokenCache} publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <RootStack />
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <SupabaseProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <RootStack />
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </SupabaseProvider>
     </ClerkProvider>
   );
 }

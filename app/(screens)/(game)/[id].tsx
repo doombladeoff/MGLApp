@@ -1,26 +1,92 @@
 import { getGameById } from "@/api/getGame";
+import { useSupabase } from "@/app/providers/SupabaseProvider";
+import { UserRatingCard } from "@/components/game/UserRatingCard";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { GameGenres } from "@/constants/genres";
+import { useUser } from "@clerk/clerk-expo";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Dimensions, FlatList, ScrollView, Text, View } from "react-native";
+import { Alert, Dimensions, FlatList, ScrollView, Text, View } from "react-native";
 
 const { width } = Dimensions.get("screen");
+
+type GameDataDB = {
+    created_at: string;
+    id: string;
+    rating_avg: number;
+    rating_count: number
+    rating_sum: number;
+};
+
+export type GameDataUserDB = {
+    created_at: string
+    game_id: string
+    id: number
+    rating: number
+    review: string
+    status: string
+    updated_at: string
+    user_id: string
+};
 
 export default function GameScreen() {
     const { id: gameId } = useLocalSearchParams<{ id: string }>();
     const [game, setGame] = useState<any>(null);
+    const [gameDataDB, setGameDataDB] = useState<GameDataDB>();
+    const [gameDataUserDB, setGameDataUserDB] = useState<GameDataUserDB>();
+
+    const { user } = useUser();
+
+    const supabase = useSupabase();
 
     const getData = async () => {
         const data = await getGameById(Number(gameId));
-        setGame(data[0]);
+        return data[0];
+    };
+
+    const fetchGameData = async () => {
+        const { data, error } = await supabase
+            .from('games')
+            .select('*')
+            .eq('id', gameId);
+
+        if (error) {
+            Alert.alert('Error', error.message);
+        } else {
+            console.log('GameData:', data);
+            return data[0];
+        }
+    };
+    const fetchGameDataByUser = async () => {
+        const { data, error } = await supabase
+            .from('user_game_reviews')
+            .select('*')
+            .eq('game_id', gameId);
+        if (error) {
+            Alert.alert('Error', error.message);
+        } else {
+            console.log('GameUserData:', data);
+            return data[0];
+        }
     };
 
     useEffect(() => {
-        getData();
+        const load = async () => {
+            const [gameData, gameDataDB, gameUserDataDB] = await Promise.all([
+                getData(),
+                fetchGameData(),
+                fetchGameDataByUser(),
+            ]);
+
+            setGame(gameData);
+            setGameDataDB(gameDataDB);
+            setGameDataUserDB(gameUserDataDB);
+        };
+
+        load();
     }, [gameId]);
 
     if (!game) return null;
@@ -113,14 +179,18 @@ export default function GameScreen() {
 
                                 <View style={{ justifyContent: "center", alignItems: "center", flex: 1 }}>
                                     <View style={{ flexDirection: "row", alignItems: 'center', gap: 32, flex: 1 }}>
-                                        <StatItem label="MGL" value="9.0" />
+                                        <StatItem label="MGL" value={gameDataDB?.rating_avg} />
                                         <StatItem label="Популяр." value="1.2т" />
-                                        <StatItem label="Отзывы" value="93" />
+                                        <StatItem label="Отзывы" value={gameDataDB?.rating_count} />
                                     </View>
                                 </View>
                             </View>
                         </BlurView>
                     </View>
+
+                    {(user && gameDataDB) && (
+                        <UserRatingCard gameDataUserDB={gameDataUserDB} />
+                    )}
 
                     <View style={{ paddingTop: 20 }}>
                         <Text

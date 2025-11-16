@@ -1,4 +1,5 @@
 import { GameDataUserDB } from "@/app/(screens)/(game)/[id]";
+import { CalculateRatingColor } from "@/utils/CalculateRatingColor";
 import { useUser } from "@clerk/clerk-expo";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
@@ -9,7 +10,7 @@ const { width } = Dimensions.get("screen");
 export const UserRatingCard = ({ gameDataUserDB }: { gameDataUserDB?: GameDataUserDB }) => {
   const { user } = useUser();
 
-  const scoreColor = 'gray'
+  const scoreColor = CalculateRatingColor(gameDataUserDB?.rating || 0);
   return (
     <TouchableOpacity
       activeOpacity={0.8}

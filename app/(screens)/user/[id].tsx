@@ -1,10 +1,10 @@
 import { useSupabase } from "@/app/providers/SupabaseProvider";
+import { GameStatus } from "@/app/types/GameTypes";
 import { UserCard } from "@/components/user/UserCard";
 import { useUser } from "@clerk/clerk-expo";
 import { useLocalSearchParams } from "expo-router";
 import { Alert, Button, ScrollView } from "react-native";
 
-type GameStatus = "total" | "finished" | "playing" | "dropped" | "want" | "pause";
 interface UserGame {
   game_id: string;
   title: string;

@@ -1,5 +1,6 @@
 import { getGameById } from "@/api/getGame";
 import { useSupabase } from "@/app/providers/SupabaseProvider";
+import { GameStatus } from "@/app/types/GameTypes";
 import { UserRatingCard } from "@/components/game/UserRatingCard";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { GameGenres } from "@/constants/genres";
@@ -27,7 +28,7 @@ export type GameDataUserDB = {
     id: number
     rating: number
     review: string
-    status: string
+    status: GameStatus
     updated_at: string
     user_id: string
 };

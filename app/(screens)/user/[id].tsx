@@ -36,7 +36,7 @@ export default function UserScreen() {
     userId: any,
     rating: any,
     review: any,
-    status: any,
+    status: GameStatus | null,
   }) {
     // 1. Проверяем — существует ли игра
     const { data: existingGame, error: gameCheckError } = await supabase
@@ -157,9 +157,9 @@ export default function UserScreen() {
       gameTitle: 'Ведьмак 3',
       gameCover: `https://images.igdb.com/igdb/image/upload/t_cover_big/coaarl.jpg`,
       userId: user.id,
-      rating: 7,
-      review: "Отличная игра!",
-      status: "finished",
+      rating: 9.4,
+      review: "Лучшеее что можер было играть!",
+      status: 'playing',
     });
   };
 

@@ -9,3 +9,19 @@ export const GameStatusNames: Record<GameStatus, string> = {
 };
 
 export type GameRatingIconName = 'angry' | 'sad' | 'less' | 'netural' | 'happy' | 'calm' | 'gray';
+
+export type GameUsersStatus = {
+  label: string;
+  value: number;
+  icon: string;
+};
+
+export type GameDataDB = {
+  created_at: string;
+  id: string;
+  rating_avg: number;
+  rating_count: number;
+  rating_sum: number;
+  title: string | null;
+  cover_url: string | null;
+};

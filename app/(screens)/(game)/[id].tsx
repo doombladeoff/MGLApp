@@ -1,7 +1,8 @@
 import { getGameById } from "@/api/getGame";
 import { useSupabase } from "@/app/providers/SupabaseProvider";
-import { GameStatus } from "@/app/types/GameTypes";
+import { GameDataDB, GameStatus, GameUsersStatus } from "@/app/types/GameTypes";
 import { UserRatingCard } from "@/components/game/UserRatingCard";
+import { UsersCompleteStatus } from "@/components/game/UsersCompleteStatus";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { GameGenres } from "@/constants/genres";
 import { useUser } from "@clerk/clerk-expo";
@@ -13,14 +14,6 @@ import { useEffect, useState } from "react";
 import { Alert, Dimensions, FlatList, ScrollView, Text, View } from "react-native";
 
 const { width } = Dimensions.get("screen");
-
-type GameDataDB = {
-    created_at: string;
-    id: string;
-    rating_avg: number;
-    rating_count: number
-    rating_sum: number;
-};
 
 export type GameDataUserDB = {
     created_at: string
@@ -38,6 +31,7 @@ export default function GameScreen() {
     const [game, setGame] = useState<any>(null);
     const [gameDataDB, setGameDataDB] = useState<GameDataDB>();
     const [gameDataUserDB, setGameDataUserDB] = useState<GameDataUserDB>();
+    const [gameUsersStatus, setGameUserStatus] = useState<GameUsersStatus[] | undefined>([]);
 
     const { user } = useUser();
 
@@ -61,30 +55,68 @@ export default function GameScreen() {
             return data[0];
         }
     };
+
     const fetchGameDataByUser = async () => {
         const { data, error } = await supabase
             .from('user_game_reviews')
             .select('*')
-            .eq('game_id', gameId);
+            .eq('game_id', gameId)
+            .eq('user_id', user?.id);
         if (error) {
             Alert.alert('Error', error.message);
         } else {
-            console.log('GameUserData:', data);
+            console.log('[Rating] GameUserData:', data);
             return data[0];
         }
     };
 
+    const getGameStatusCounts = async () => {
+        const { data, error } = await supabase
+            .from("user_game_reviews")
+            .select("status")
+            .eq("game_id", gameId);
+
+        if (error) {
+            console.error("Ошибка получения данных:", error);
+            return;
+        }
+
+        const counts: any = {
+            finished: 0,
+            playing: 0,
+            want: 0,
+            dropped: 0,
+        };
+
+        data.forEach(item => {
+            if (item.status in counts) {
+                counts[item.status] += 1;
+            }
+        });
+
+        const result: GameUsersStatus[] = [
+            { label: "Пройдено", value: counts.finished, icon: 'flag' },
+            { label: "Играю", value: counts.playing, icon: 'gamepad' },
+            { label: "Хочу", value: counts.want, icon: 'stars' },
+            { label: "Брошено", value: counts.dropped, icon: 'skull' },
+        ];
+
+        return result;
+    };
+
     useEffect(() => {
         const load = async () => {
-            const [gameData, gameDataDB, gameUserDataDB] = await Promise.all([
+            const [gameData, gameDataDB, gameUserDataDB, getGameUserStatus] = await Promise.all([
                 getData(),
                 fetchGameData(),
                 fetchGameDataByUser(),
+                getGameStatusCounts(),
             ]);
 
             setGame(gameData);
             setGameDataDB(gameDataDB);
             setGameDataUserDB(gameUserDataDB);
+            setGameUserStatus(getGameUserStatus)
         };
 
         load();
@@ -212,36 +244,7 @@ export default function GameScreen() {
                         </Text>
                     </View>
 
-                    {/* ЗАГЛУШКА */}
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            paddingTop: 24,
-                            marginHorizontal: 8,
-                        }}
-                    >
-                        {[
-                            { label: "пройдено", value: "977" },
-                            { label: "играю", value: "523" },
-                            { label: "хочу", value: "812" },
-                            { label: "брошено", value: "104" },
-                        ].map((item, idx) => (
-                            <View key={idx} style={{ alignItems: "center" }}>
-                                <Text style={{ color: "gray", fontSize: 13 }}>{item.label}</Text>
-                                <Text
-                                    style={{
-                                        fontWeight: "bold",
-                                        color: "white",
-                                        fontSize: 15,
-                                        marginTop: 2,
-                                    }}
-                                >
-                                    {item.value}
-                                </Text>
-                            </View>
-                        ))}
-                    </View>
+                    <UsersCompleteStatus gameUsersStatus={gameUsersStatus || []} />
 
                     <View style={{ marginTop: 24, gap: 6 }}>
                         <MetaRow label="Разработчики" value={developers || "—"} />

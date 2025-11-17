@@ -1,6 +1,7 @@
 import { getGameById } from "@/api/getGame";
 import { useSupabase } from "@/app/providers/SupabaseProvider";
 import { GameDataDB, GameStatus, GameUsersStatus } from "@/app/types/GameTypes";
+import { ScreenshotsList } from "@/components/game/ScreenshotsList";
 import { UserRatingCard } from "@/components/game/UserRatingCard";
 import { UsersCompleteStatus } from "@/components/game/UsersCompleteStatus";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -269,31 +270,7 @@ export default function GameScreen() {
 
                     {screenshots?.length > 0 && (
                         <View style={{ paddingTop: 20 }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                                <IconSymbol name="camera" size={24} color={'white'} />
-                                <Text style={{ color: 'white' }}>Скриншоты ({screenshots.length})</Text>
-                            </View>
-                            <FlatList
-                                data={screenshots}
-                                renderItem={({ item }) => (
-                                    <Image
-                                        source={{ uri: `https:${item}` }}
-                                        style={{
-                                            width: 320,
-                                            height: 170,
-                                            marginVertical: 20,
-                                            marginRight: 20,
-                                            borderRadius: 12,
-                                            backgroundColor: "#222",
-                                        }}
-                                        contentFit="cover"
-                                        transition={400}
-                                    />
-                                )}
-                                keyExtractor={(_, index) => index.toString()}
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                            />
+                            <ScreenshotsList screenshots={screenshots} />
                         </View>
                     )}
                 </View>

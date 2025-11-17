@@ -1,6 +1,7 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@clerk/clerk-expo';
-import { Stack } from "expo-router";
+import { HeaderBackButton } from '@react-navigation/elements';
+import { router, Stack } from "expo-router";
 import React from "react";
 import { PlatformColor, TouchableOpacity } from "react-native";
 
@@ -26,6 +27,17 @@ export default function ScreensLayout() {
         }}
       />
       <Stack.Screen
+        name='(game)/write-review'
+        options={{
+          presentation: 'formSheet',
+          sheetExpandsWhenScrolledToEdge: true,
+          headerTransparent: true,
+          headerBlurEffect: 'dark',
+          headerStyle: { backgroundColor: undefined },
+          headerLeft: () => (<HeaderBackButton onPress={router.back} label='Назад' style={{ gap: 5 }} labelStyle={{ color: PlatformColor('link') }} />),
+        }}
+      />
+      <Stack.Screen
         name="user/[id]"
         options={{
           headerRight: () => (
@@ -35,7 +47,6 @@ export default function ScreensLayout() {
           ),
         }}
       />
-
       <Stack.Screen
         name="user/profile-edit"
         options={{

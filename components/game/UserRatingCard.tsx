@@ -4,12 +4,13 @@ import { CalculateRatingColor } from "@/utils/CalculateRatingColor";
 import { useUser } from "@clerk/clerk-expo";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
+import { Link } from "expo-router";
 import { Dimensions, Text, TouchableOpacity, View } from "react-native";
 import { UserRatingIcon } from "./UserRatingIcon/UserRatingIcon";
 
 const { width } = Dimensions.get("screen");
 
-export const UserRatingCard = ({ gameDataUserDB }: { gameDataUserDB?: GameDataUserDB }) => {
+export const UserRatingCard = ({ gameDataUserDB, gameData, game }: { gameDataUserDB?: GameDataUserDB, gameData: any, game: any }) => {
   const { user } = useUser();
 
   const scoreColor = CalculateRatingColor(gameDataUserDB?.rating || 0);
@@ -32,56 +33,72 @@ export const UserRatingCard = ({ gameDataUserDB }: { gameDataUserDB?: GameDataUs
   const iconName = getIcon();
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      style={{
-        marginTop: 20,
-        shadowColor: "white",
-        shadowOpacity: 0.25,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 0 },
+    <Link
+      href={{
+        pathname: '/(screens)/(game)/write-review',
+        params: {
+          id: gameData?.id || game.id,
+          title: gameData?.title || game.name,
+          cover: gameData?.cover_url || `https:${game.cover.url.replace("t_thumb", "t_cover_big")}`,
+
+          rating: gameDataUserDB?.rating,
+          review: gameDataUserDB?.review,
+          status: gameDataUserDB?.status
+        }
       }}
+      asChild
     >
-      <BlurView
-        intensity={30}
+      <TouchableOpacity
+        activeOpacity={0.8}
         style={{
-          width: width - 24,
-          height: 140,
-          overflow: "hidden",
-          borderRadius: 20,
-          justifyContent: 'center',
-          padding: 14,
+          marginTop: 20,
+          shadowColor: "white",
+          shadowOpacity: 0.25,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: 0 },
         }}
       >
-        <View
+        <BlurView
+          intensity={30}
           style={{
-            flexDirection: "row",
-            gap: 12,
+            width: width - 24,
+            height: 140,
+            overflow: "hidden",
+            borderRadius: 20,
+            justifyContent: 'center',
+            padding: 14,
           }}
         >
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 12,
+            }}
+          >
 
-          <Image
-            source={{ uri: user?.imageUrl }}
-            style={{ width: 90, height: 90, borderRadius: 100 }}
-            contentFit="cover"
-            transition={500}
-          />
+            <Image
+              source={{ uri: user?.imageUrl }}
+              style={{ width: 90, height: 90, borderRadius: 100 }}
+              contentFit="cover"
+              transition={500}
+            />
 
-          <View style={{ height: 90, justifyContent: 'center' }}>
-            <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 16, fontWeight: '600' }}>Ваша оценка</Text>
-            <Text style={{ color: scoreColor, fontSize: 30, fontWeight: 'bold', }}>
-              {gameDataUserDB?.rating != null ? gameDataUserDB.rating : 'NS'}
-            </Text>
-            <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 16, fontWeight: '600' }}>{GameStatusNames[gameDataUserDB?.status as GameStatus] || "Без статуса"}</Text>
+            <View style={{ height: 90, justifyContent: 'center' }}>
+              <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 16, fontWeight: '600' }}>Ваша оценка</Text>
+              <Text style={{ color: scoreColor, fontSize: 30, fontWeight: 'bold', }}>
+                {gameDataUserDB?.rating != null ? gameDataUserDB.rating : 'NS'}
+              </Text>
+              <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 16, fontWeight: '600' }}>{GameStatusNames[gameDataUserDB?.status as GameStatus] || "Без статуса"}</Text>
+            </View>
+
           </View>
 
-        </View>
+          <View style={{ position: 'absolute', right: 0 }}>
+            <UserRatingIcon name={iconName} />
+          </View>
 
-        <View style={{ position: 'absolute', right: 0 }}>
-          <UserRatingIcon name={iconName} />
-        </View>
-
-      </BlurView>
-    </TouchableOpacity>
+        </BlurView>
+      </TouchableOpacity>
+    </Link>
   );
 };

@@ -221,8 +221,8 @@ export default function GameScreen() {
                         </BlurView>
                     </View>
 
-                    {(user && gameDataDB) && (
-                        <UserRatingCard gameDataUserDB={gameDataUserDB} />
+                    {(user) && (
+                        <UserRatingCard gameDataUserDB={gameDataUserDB} gameData={gameDataDB} game={game} />
                     )}
 
                     <View style={{ paddingTop: 20 }}>

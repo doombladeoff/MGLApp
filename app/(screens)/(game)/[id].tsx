@@ -1,7 +1,9 @@
 import { getGameById } from "@/api/getGame";
 import { useSupabase } from "@/app/providers/SupabaseProvider";
 import { GameDataDB, GameStatus, GameUsersStatus } from "@/app/types/GameTypes";
+import { MetaRow } from "@/components/game/MetaRow";
 import { ScreenshotsList } from "@/components/game/ScreenshotsList";
+import { StatsCard } from "@/components/game/StatsCard";
 import { UserRatingCard } from "@/components/game/UserRatingCard";
 import { UsersCompleteStatus } from "@/components/game/UsersCompleteStatus";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -130,6 +132,7 @@ export default function GameScreen() {
     const screenshots = game?.screenshots?.map((s: any) =>
         s.url.replace("t_thumb", "t_screenshot_big")
     );
+    
     const randomScreenshot =
         screenshots?.length > 0
             ? screenshots[Math.floor(Math.random() * screenshots.length)]
@@ -177,51 +180,7 @@ export default function GameScreen() {
                 </View>
 
                 <View>
-                    <View
-                        style={{
-                            shadowColor: "white",
-                            shadowOpacity: 0.25,
-                            shadowRadius: 8,
-                            shadowOffset: { width: 0, height: 0 },
-                        }}
-                    >
-                        <BlurView
-                            intensity={30}
-                            style={{
-                                width: width - 24,
-                                height: 140,
-                                overflow: "hidden",
-                                borderRadius: 20,
-                            }}
-                        >
-                            <View
-                                style={{
-                                    padding: 10,
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    gap: 12,
-                                }}
-                            >
-                                {cover && (
-                                    <Image
-                                        source={{ uri: `https:${cover}` }}
-                                        style={{ width: 90, height: 120, borderRadius: 12 }}
-                                        contentFit="cover"
-                                        transition={500}
-                                    />
-                                )}
-
-                                <View style={{ justifyContent: "center", alignItems: "center", flex: 1 }}>
-                                    <View style={{ flexDirection: "row", alignItems: 'center', gap: 32, flex: 1 }}>
-                                        <StatItem label="MGL" value={gameDataDB?.rating_avg} />
-                                        <StatItem label="Популяр." value="1.2т" />
-                                        <StatItem label="Отзывы" value={gameDataDB?.rating_count} />
-                                    </View>
-                                </View>
-                            </View>
-                        </BlurView>
-                    </View>
-
+                    <StatsCard cover={cover} gameDataDB={gameDataDB} />
                     {(user) && (
                         <UserRatingCard gameDataUserDB={gameDataUserDB} gameData={gameDataDB} game={game} />
                     )}
@@ -252,7 +211,11 @@ export default function GameScreen() {
                         <MetaRow label="Издатели" value={publishers || "—"} />
                         <MetaRow
                             label="Жанры"
-                            value={game?.genres?.map((el: any) => GameGenres[el.id as keyof typeof GameGenres] ?? 'Неизвестно').join(", ")}
+                            value={
+                                game?.genres?.map((el: any) =>
+                                    GameGenres[el.id as keyof typeof GameGenres] ?? 'Неизвестно')
+                                    .join(", ")
+                            }
                         />
                         <MetaRow
                             label="Платформы"
@@ -275,27 +238,6 @@ export default function GameScreen() {
                     )}
                 </View>
             </ScrollView>
-        </View>
-    );
-}
-
-function MetaRow({ label, value }: { label: string; value?: string }) {
-    if (!value) return null;
-    return (
-        <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-            <Text style={{ color: "gray" }}>{label}: </Text>
-            <Text style={{ fontWeight: "600", color: "white" }}>{value}</Text>
-        </View>
-    );
-};
-
-function StatItem({ label, value }: { label: string; value: string }) {
-    return (
-        <View style={{ alignItems: "center" }}>
-            <Text style={{ color: "gray", fontSize: 20 }}>{label}</Text>
-            <Text style={{ color: "white", fontWeight: "600", fontSize: 18 }}>
-                {value}
-            </Text>
         </View>
     );
 };

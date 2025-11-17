@@ -1,4 +1,5 @@
 import { GameStatus } from "@/app/types/GameTypes";
+import { RatingSlider } from "@/components/game/review/RatingSlider";
 import { CalculateRatingColor } from "@/utils/CalculateRatingColor";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams } from "expo-router";
@@ -55,6 +56,8 @@ export default function WriteReviewScreen() {
             <Text style={{ color: 'white', fontSize: 30, fontWeight: 'bold' }}>{title || 'No title'}</Text>
           </View>
         </View>
+
+        <RatingSlider setRating={setUserRating} rating={Number(rating) || 0} />
 
         <View style={{ height: 400, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', }}>
           <TextInput

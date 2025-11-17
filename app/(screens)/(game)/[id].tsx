@@ -1,6 +1,7 @@
 import { getGameById } from "@/api/getGame";
 import { useSupabase } from "@/app/providers/SupabaseProvider";
 import { GameDataDB, GameStatus, GameUsersStatus } from "@/app/types/GameTypes";
+import HeaderImge from "@/components/game/HeaderImage";
 import { MetaRow } from "@/components/game/MetaRow";
 import { ScreenshotsList } from "@/components/game/ScreenshotsList";
 import { StatsCard } from "@/components/game/StatsCard";
@@ -160,25 +161,7 @@ export default function GameScreen() {
                 }}
                 showsVerticalScrollIndicator={false}
             >
-                <View style={{ position: 'absolute', zIndex: 0, width: '100%', height: 220 }}>
-                    <LinearGradient
-                        colors={["transparent", "black"]}
-                        style={{
-                            position: "absolute",
-                            bottom: 0,
-                            width,
-                            height: 140,
-                            zIndex: 999
-                        }}
-                    />
-                    <Image
-                        source={{ uri: randomScreenshot ? `https:${randomScreenshot}` : undefined }}
-                        style={{ width, height: 220, position: 'absolute', top: 0, zIndex: 1 }}
-                        contentFit="cover"
-                        transition={500}
-                    />
-                </View>
-
+                <HeaderImge screenshots={game?.screenshots || []} />
                 <View>
                     <StatsCard cover={cover} gameDataDB={gameDataDB} />
                     {(user) && (
@@ -231,9 +214,9 @@ export default function GameScreen() {
                         </View>
                     )}
 
-                    {screenshots?.length > 0 && (
+                    {game?.screenshots?.length > 0 && (
                         <View style={{ paddingTop: 20 }}>
-                            <ScreenshotsList screenshots={screenshots} />
+                            <ScreenshotsList screenshots={game.screenshots} />
                         </View>
                     )}
                 </View>

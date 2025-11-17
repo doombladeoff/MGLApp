@@ -14,7 +14,7 @@ export const ScreenshotsList = ({ screenshots }: { screenshots: any[] }) => {
         data={screenshots}
         renderItem={({ item }) => (
           <Image
-            source={{ uri: `https:${item}` }}
+            source={{ uri: `https:${item.url}` }}
             style={{
               width: 320,
               height: 170,

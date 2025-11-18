@@ -5,7 +5,7 @@ export const GameStatusNames: Record<GameStatus, string> = {
   playing: "Играю",
   dropped: "Брошено",
   want: "Хочу",
-  pause: "Пауза",
+  pause: "На паузе",
 };
 
 export type GameRatingIconName = 'angry' | 'sad' | 'less' | 'netural' | 'happy' | 'calm' | 'gray';

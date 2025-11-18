@@ -1,6 +1,7 @@
 import { useSupabase } from "@/app/providers/SupabaseProvider";
 import { GameStatus } from "@/app/types/GameTypes";
 import { RatingSlider } from "@/components/game/review/RatingSlider";
+import { StatusSelector } from "@/components/game/review/StatusSelector";
 import { CalculateRatingColor } from "@/utils/CalculateRatingColor";
 import { useUser } from "@clerk/clerk-expo";
 import { Image } from "expo-image";
@@ -21,7 +22,7 @@ export default function WriteReviewScreen() {
   }>();
 
   const [userRating, setUserRating] = useState(rating ? Number(rating) : 0);
-  const [userStatus, setUserStatus] = useState<GameStatus>(status);
+  const [userStatus, setUserStatus] = useState<GameStatus | null>(status);
   const ratingColor = CalculateRatingColor(userRating || 0);
 
   const { user } = useUser();
@@ -103,7 +104,7 @@ export default function WriteReviewScreen() {
       userId: user.id,
       rating: userRating,
       review: '',
-      status:'want',
+      status: userStatus,
     })
   };
 
@@ -146,6 +147,7 @@ export default function WriteReviewScreen() {
         </View>
 
         <RatingSlider setRating={setUserRating} rating={Number(rating) || 0} />
+        <StatusSelector value={userStatus} onChange={setUserStatus} />
 
         <View style={{ height: 400, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', }}>
           <TextInput

@@ -1,226 +1,117 @@
-import { getGameById } from "@/api/getGame";
-import { useSupabase } from "@/app/providers/SupabaseProvider";
-import { GameDataDB, GameStatus, GameUsersStatus } from "@/app/types/GameTypes";
 import HeaderImge from "@/components/game/HeaderImage";
 import { MetaRow } from "@/components/game/MetaRow";
 import { ScreenshotsList } from "@/components/game/ScreenshotsList";
 import { StatsCard } from "@/components/game/StatsCard";
 import { UserRatingCard } from "@/components/game/UserRatingCard";
 import { UsersCompleteStatus } from "@/components/game/UsersCompleteStatus";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { GameGenres } from "@/constants/genres";
+import { useGameScreenData } from "@/hooks/use-game-screen-data";
 import { useUser } from "@clerk/clerk-expo";
-import { BlurView } from "expo-blur";
-import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
-import { Alert, Dimensions, FlatList, ScrollView, Text, View } from "react-native";
-
-const { width } = Dimensions.get("screen");
-
-export type GameDataUserDB = {
-    created_at: string
-    game_id: string
-    id: number
-    rating: number
-    review: string
-    status: GameStatus
-    updated_at: string
-    user_id: string
-};
+import { ScrollView, Text, View } from "react-native";
 
 export default function GameScreen() {
-    const { id: gameId } = useLocalSearchParams<{ id: string }>();
-    const [game, setGame] = useState<any>(null);
-    const [gameDataDB, setGameDataDB] = useState<GameDataDB>();
-    const [gameDataUserDB, setGameDataUserDB] = useState<GameDataUserDB>();
-    const [gameUsersStatus, setGameUserStatus] = useState<GameUsersStatus[] | undefined>([]);
+  const { id: gameId } = useLocalSearchParams<{ id: string }>();
 
-    const { user } = useUser();
+  const {
+    game,
+    gameDataDB,
+    gameDataUserDB,
+    gameUsersStatus
+  } = useGameScreenData({ gameId: gameId });
 
-    const supabase = useSupabase();
+  const { user } = useUser();
 
-    const getData = async () => {
-        const data = await getGameById(Number(gameId));
-        return data[0];
-    };
+  if (!game) return null;
 
-    const fetchGameData = async () => {
-        const { data, error } = await supabase
-            .from('games')
-            .select('*')
-            .eq('id', gameId);
+  const cover = game?.cover?.url?.replace("t_thumb", "t_cover_big");
 
-        if (error) {
-            Alert.alert('Error', error.message);
-        } else {
-            console.log('GameData:', data);
-            return data[0];
-        }
-    };
+  const developers = game?.involved_companies
+    ?.filter((el: any) => el.developer)
+    ?.map((el: any) => el.company.name)
+    ?.join(", ");
 
-    const fetchGameDataByUser = async () => {
-        const { data, error } = await supabase
-            .from('user_game_reviews')
-            .select('*')
-            .eq('game_id', gameId)
-            .eq('user_id', user?.id);
-        if (error) {
-            Alert.alert('Error', error.message);
-        } else {
-            console.log('[Rating] GameUserData:', data);
-            return data[0];
-        }
-    };
+  const publishers = game?.involved_companies
+    ?.filter((el: any) => el.publisher)
+    ?.map((el: any) => el.company.name)
+    ?.join(", ");
 
-    const getGameStatusCounts = async () => {
-        const { data, error } = await supabase
-            .from("user_game_reviews")
-            .select("status")
-            .eq("game_id", gameId);
+  return (
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 12,
+          paddingBottom: 40,
+          backgroundColor: "black",
+          paddingTop: 170
 
-        if (error) {
-            console.error("Ошибка получения данных:", error);
-            return;
-        }
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        <HeaderImge screenshots={game?.screenshots || []} />
+        <View>
+          <StatsCard cover={cover} gameDataDB={gameDataDB} />
+          {(user) && (
+            <UserRatingCard
+              gameDataUserDB={gameDataUserDB}
+              gameData={gameDataDB}
+              game={game}
+            />
+          )}
 
-        const counts: any = {
-            finished: 0,
-            playing: 0,
-            want: 0,
-            dropped: 0,
-        };
-
-        data.forEach(item => {
-            if (item.status in counts) {
-                counts[item.status] += 1;
-            }
-        });
-
-        const result: GameUsersStatus[] = [
-            { label: "Пройдено", value: counts.finished, icon: 'flag' },
-            { label: "Играю", value: counts.playing, icon: 'gamepad' },
-            { label: "Хочу", value: counts.want, icon: 'stars' },
-            { label: "Брошено", value: counts.dropped, icon: 'skull' },
-        ];
-
-        return result;
-    };
-
-    useEffect(() => {
-        const load = async () => {
-            const [gameData, gameDataDB, gameUserDataDB, getGameUserStatus] = await Promise.all([
-                getData(),
-                fetchGameData(),
-                fetchGameDataByUser(),
-                getGameStatusCounts(),
-            ]);
-
-            setGame(gameData);
-            setGameDataDB(gameDataDB);
-            setGameDataUserDB(gameUserDataDB);
-            setGameUserStatus(getGameUserStatus)
-        };
-
-        load();
-    }, [gameId]);
-
-    if (!game) return null;
-
-    const cover = game?.cover?.url?.replace("t_thumb", "t_cover_big");
-
-    const screenshots = game?.screenshots?.map((s: any) =>
-        s.url.replace("t_thumb", "t_screenshot_big")
-    );
-    
-    const randomScreenshot =
-        screenshots?.length > 0
-            ? screenshots[Math.floor(Math.random() * screenshots.length)]
-            : null;
-
-    const developers = game?.involved_companies
-        ?.filter((el: any) => el.developer)
-        ?.map((el: any) => el.company.name)
-        ?.join(", ");
-
-    const publishers = game?.involved_companies
-        ?.filter((el: any) => el.publisher)
-        ?.map((el: any) => el.company.name)
-        ?.join(", ");
-
-    return (
-        <View style={{ flex: 1 }}>
-            <ScrollView
-                contentContainerStyle={{
-                    paddingHorizontal: 12,
-                    paddingBottom: 40,
-                    backgroundColor: "black",
-                    paddingTop: 170
-
-                }}
-                showsVerticalScrollIndicator={false}
+          <View style={{ paddingTop: 20 }}>
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "700",
+                color: "white",
+                marginBottom: 4,
+              }}
             >
-                <HeaderImge screenshots={game?.screenshots || []} />
-                <View>
-                    <StatsCard cover={cover} gameDataDB={gameDataDB} />
-                    {(user) && (
-                        <UserRatingCard gameDataUserDB={gameDataUserDB} gameData={gameDataDB} game={game} />
-                    )}
+              {game.name}
+            </Text>
+            <Text style={{ fontSize: 15, color: "gray" }}>
+              {game?.release_dates?.[0]?.y ?? "—"} |{" "}
+              {game.version_parent || game.parent_game
+                ? "Дополнение"
+                : "Основная игра"}
+            </Text>
+          </View>
 
-                    <View style={{ paddingTop: 20 }}>
-                        <Text
-                            style={{
-                                fontSize: 20,
-                                fontWeight: "700",
-                                color: "white",
-                                marginBottom: 4,
-                            }}
-                        >
-                            {game.name}
-                        </Text>
-                        <Text style={{ fontSize: 15, color: "gray" }}>
-                            {game?.release_dates?.[0]?.y ?? "—"} |{" "}
-                            {game.version_parent || game.parent_game
-                                ? "Дополнение"
-                                : "Основная игра"}
-                        </Text>
-                    </View>
+          <UsersCompleteStatus gameUsersStatus={gameUsersStatus || []} />
 
-                    <UsersCompleteStatus gameUsersStatus={gameUsersStatus || []} />
+          <View style={{ marginTop: 24, gap: 6 }}>
+            <MetaRow label="Разработчики" value={developers || "—"} />
+            <MetaRow label="Издатели" value={publishers || "—"} />
+            <MetaRow
+              label="Жанры"
+              value={
+                game?.genres?.map((el: any) =>
+                  GameGenres[el.id as keyof typeof GameGenres] ?? 'Неизвестно')
+                  .join(", ")
+              }
+            />
+            <MetaRow
+              label="Платформы"
+              value={game?.platforms?.map((el: any) => el.name).join(", ")}
+            />
+          </View>
 
-                    <View style={{ marginTop: 24, gap: 6 }}>
-                        <MetaRow label="Разработчики" value={developers || "—"} />
-                        <MetaRow label="Издатели" value={publishers || "—"} />
-                        <MetaRow
-                            label="Жанры"
-                            value={
-                                game?.genres?.map((el: any) =>
-                                    GameGenres[el.id as keyof typeof GameGenres] ?? 'Неизвестно')
-                                    .join(", ")
-                            }
-                        />
-                        <MetaRow
-                            label="Платформы"
-                            value={game?.platforms?.map((el: any) => el.name).join(", ")}
-                        />
-                    </View>
+          {game?.summary && (
+            <View style={{ paddingTop: 24 }}>
+              <Text style={{ color: "gray", fontSize: 16, lineHeight: 22 }}>
+                {game.summary}
+              </Text>
+            </View>
+          )}
 
-                    {game?.summary && (
-                        <View style={{ paddingTop: 24 }}>
-                            <Text style={{ color: "gray", fontSize: 16, lineHeight: 22 }}>
-                                {game.summary}
-                            </Text>
-                        </View>
-                    )}
-
-                    {game?.screenshots?.length > 0 && (
-                        <View style={{ paddingTop: 20 }}>
-                            <ScreenshotsList screenshots={game.screenshots} />
-                        </View>
-                    )}
-                </View>
-            </ScrollView>
+          {game?.screenshots?.length > 0 && (
+            <View style={{ paddingTop: 20 }}>
+              <ScreenshotsList screenshots={game.screenshots} />
+            </View>
+          )}
         </View>
-    );
+      </ScrollView>
+    </View>
+  );
 };

@@ -1,6 +1,8 @@
+import { useSupabase } from "@/app/providers/SupabaseProvider";
 import { GameStatus } from "@/app/types/GameTypes";
 import { RatingSlider } from "@/components/game/review/RatingSlider";
 import { CalculateRatingColor } from "@/utils/CalculateRatingColor";
+import { useUser } from "@clerk/clerk-expo";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from 'react';
@@ -22,13 +24,99 @@ export default function WriteReviewScreen() {
   const [userStatus, setUserStatus] = useState<GameStatus>(status);
   const ratingColor = CalculateRatingColor(userRating || 0);
 
+  const { user } = useUser();
+  const supabase = useSupabase();
+
+  if (!user) return;
+
+  async function addGameAndReview({
+    gameId,
+    gameTitle = null,
+    gameCover = null,
+    userId,
+    rating = null,
+    review = null,
+    status = null,
+  }: {
+    gameId: any,
+    gameTitle: any,
+    gameCover: any,
+    userId: any,
+    rating: any,
+    review: any,
+    status: GameStatus | null,
+  }) {
+    const { data: existingGame, error: gameCheckError } = await supabase
+      .from("games")
+      .select("id")
+      .eq("id", gameId)
+      .single();
+
+    if (gameCheckError && gameCheckError.code !== "PGRST116") {
+      console.error("Ошибка проверки игры:", gameCheckError);
+      throw gameCheckError;
+    }
+
+    if (!existingGame) {
+      const { error: insertGameError } = await supabase
+        .from("games")
+        .insert({
+          id: gameId,
+          title: gameTitle,
+          cover_url: gameCover,
+        });
+
+      if (insertGameError) {
+        console.error("Ошибка создания игры:", insertGameError);
+        throw insertGameError;
+      }
+    }
+
+    const { data: reviewData, error: reviewError } = await supabase
+      .from("user_game_reviews")
+      .upsert(
+        {
+          user_id: userId,
+          game_id: gameId,
+          rating,
+          review,
+          status,
+        },
+        { onConflict: "user_id,game_id" }
+      )
+      .select("*")
+      .single();
+
+    if (reviewError) {
+      console.error("Ошибка сохранения отзыва:", reviewError);
+      throw reviewError;
+    }
+
+    return reviewData;
+  };
+
+  const handleAddReview = async () => {
+    await addGameAndReview({
+      gameId: id,
+      gameTitle: title,
+      gameCover: cover,
+      userId: user.id,
+      rating: userRating,
+      review: '',
+      status:'want',
+    })
+  };
+
   return (
     <>
       <Stack.Screen
         options={{
           ...(__DEV__ && { headerTitle: `ID: ${id}` }),
           headerRight: () => (
-            <TouchableOpacity activeOpacity={0.8}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={async () => await handleAddReview()}
+            >
               <View style={{ backgroundColor: 'white', borderRadius: 16, paddingVertical: 6, paddingHorizontal: 8 }}>
                 <Text style={{ fontSize: 16, fontWeight: "600" }}>{Number(rating) > 0 ? 'Обновить' : 'Добавить'}</Text>
               </View>
